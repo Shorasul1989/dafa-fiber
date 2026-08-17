@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAFA FIBER Pro - Zakup & Logistika</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .header { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { color: #1F2937; font-size: 28px; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-left: 10px; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-secondary { background: #10b981; color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 250px 1fr; gap: 20px; }
+        .sidebar { background: white; padding: 20px; border-radius: 12px; height: fit-content; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .sidebar h3 { color: #667eea; margin-bottom: 15px; font-size: 14px; text-transform: uppercase; }
+        .filter-group { margin-bottom: 20px; }
+        .filter-group label { display: block; font-size: 12px; color: #6B7280; margin-bottom: 8px; text-transform: uppercase; font-weight: 600; }
+        .filter-group select { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; }
+        .tabs { display: flex; gap: 0; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 20px; }
+        .tab { flex: 1; padding: 15px 20px; border: none; cursor: pointer; font-weight: 600; color: #6B7280; border-bottom: 3px solid transparent; }
+        .tab.active { color: #667eea; border-bottom-color: #667eea; }
+        .tab-content { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .tab-content.active { display: block; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+        .card { background: white; border: 1px solid #E5E7EB; border-radius: 8px; padding: 15px; border-top: 4px solid #667eea; }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .card-title { font-weight: 600; color: #1F2937; }
+        .card-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid #F3F4F6; }
+        .label { color: #6B7280; }
+        .value { color: #1F2937; font-weight: 600; }
+        .status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .status-pending { background: #FEF3C7; color: #92400E; }
+        .status-approved { background: #D1FAE5; color: #065F46; }
+        .status-shipped { background: #DBEAFE; color: #0C4A6E; }
+        .status-delivered { background: #E9D5FF; color: #6B21A8; }
+        .chart-container { height: 400px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #F9FAFB; padding: 12px; text-align: left; font-weight: 600; font-size: 12px; border-bottom: 2px solid #E5E7EB; }
+        td { padding: 12px; border-bottom: 1px solid #E5E7EB; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 DAFA FIBER - Zakup & Logistika</h1>
+        <div>
+            <button class="btn btn-primary" onclick="showAddForm()">+ Yangi</button>
+            <button class="btn btn-secondary" onclick="exportData()">📥 Export</button>
+            <button class="btn btn-danger" onclick="clearData()">🗑️ O'chirish</button>
+        </div>
+    </div>
+    <div class="content">
+        <div class="sidebar">
+            <h3>Filtrlar</h3>
+            <div class="filter-group">
+                <label>Status</label>
+                <select id="statusFilter" onchange="applyFilters()">
+                    <option value="">Barchasi</option>
+                    <option value="Pending">Kutilmoqda</option>
+                    <option value="Approved">Tasdiqlandi</option>
+                    <option value="Shipped">Jo'natildi</option>
+                    <option value="Delivered">Yetkazildi</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Logistika</label>
+                <select id="logisticsFilter" onchange="applyFilters()">
+                    <option value="">Barchasi</option>
+                    <option value="Avia">✈️ Avia</option>
+                    <option value="Train">🚂 Poyezd</option>
+                    <option value="Container">📦 Konteyner</option>
+                    <option value="Courier">🚚 Kuryer</option>
+                    <option value="Self">🚗 O'zi Olib</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('cards')">📋 Zayavkalar</button>
+                <button class="tab" onclick="switchTab('chart')">📊 Tahlil</button>
+                <button class="tab" onclick="switchTab('table')">👥 Klient</button>
+            </div>
+            <div id="cards" class="tab-content active">
+                <div class="cards" id="cardsContainer"></div>
+            </div>
+            <div id="chart" class="tab-content">
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div id="table" class="tab-content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nomi</th>
+                            <th>Miqdori</th>
+                            <th>Narx</th>
+                            <th>Jami</th>
+                            <th>Status</th>
+                            <th>Logistika</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; display:flex; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:12px; width:90%; max-width:500px;">
+            <h2>Yangi Zayavka Qo'shish</h2>
+            <form id="itemForm" onsubmit="addItem(event)" style="display:grid; gap:15px; margin-top:20px;">
+                <input type="text" id="name" placeholder="Mahsulot Nomi" required>
+                <input type="number" id="qty" placeholder="Miqdori" required>
+                <input type="number" id="price" placeholder="Narx" required>
+                <select id="currency" required>
+                    <option value="CNY">¥ CNY</option>
+                    <option value="USD">$ USD</option>
+                    <option value="EUR">€ EUR</option>
+                    <option value="UZS">so'm UZS</option>
+                    <option value="RUB">₽ RUB</option>
+                </select>
+                <select id="status"
